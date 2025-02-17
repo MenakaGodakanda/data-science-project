@@ -255,49 +255,144 @@ ax.annotate(
     size=textsize
 )
 ```
-- ax.annotate(value, position, color=colour, size=textsize) → Adds text on top of the bar.
+
+### XI. Adding Text Annotations
+```
+ax.annotate(
+    value,
+    ((p.get_x()+ p.get_width()/2)*pad-0.05, (p.get_y()+p.get_height()/2)*pad),
+    color=colour,
+    size=textsize
+)
+```
+- `ax.annotate(value, position, color=colour, size=textsize)` → Adds text on top of the bar.
 - Position Calculation:
     - `p.get_x() + p.get_width()/2` → Centers the text horizontally.
     - `p.get_y() + p.get_height()/2` → Centers the text vertically.
     - `pad=0.99` adjusts the placement slightly.
     - `-0.05` fine-tunes the horizontal position.
 
+### XII. Churn
+Analyze customer retention vs churn rates in businesses.
+- Extracts relevant columns (`id` and `churn`).
+- Renames the columns for readability.
+- Counts the number of companies in each churn category.
+- Calculates the churn percentages.
+- Plots a stacked bar chart to visualize the churn distribution.
 
-
-
-
-
-
-
-
-
-
-### Churn
+#### Selecting Specific Columns
 ```
 churn = client_df[['id', 'churn']]
+```
+- `client_df[['id', 'churn']]`:
+    - Extracts only the `id` and `churn` columns from `client_df`.
+    - Assumption:
+        - `id`: Represents unique company/client identifiers.
+        - `churn`: A categorical variable (e.g., `0` for retained clients and `1` for churned clients).
+    - The new DataFrame `churn` now contains only these two columns.
+
+#### Renaming Columns
+```
 churn.columns = ['Companies', 'churn']
+```
+- Renames the columns for better readability:
+    - `id` → `Companies`
+    - `churn` (remains the same)
+
+#### Counting Companies by Churn Status
+```
 churn_total = churn.groupby(churn['churn']).count()
+```
+- `churn.groupby(churn['churn']).count()`:
+    - Groups the DataFrame by the `churn` column.
+    - Counts the number of companies (`Companies` column) in each churn category (`0` or `1`).
+
+#### Calculating Churn Percentage
+```
 churn_percentage = churn_total / churn_total.sum() * 100
 ```
+- Computes the percentage of churned and retained companies.
+- Example Calculation:
+    - Total Companies: 500 + 200 = 700
+    - Retention Rate: 500 / 700 × 100 = 71.43%
+    - Churn Rate: 200 / 700 × 100 = 28.57%
 
+#### Plotting the Stacked Bar Chart
 ```
 plot_stacked_bars(churn_percentage.transpose(), "Churning status", (5, 5), legend_="lower right")
 ```
+- `churn_percentage.transpose()`:
+    - Transposes the DataFrame to make it suitable for `plot_stacked_bars()`.
+- `plot_stacked_bars(..., "Churning status", (5, 5), legend_="lower right")`:
+    - Calls the `plot_stacked_bars` function (previously defined).
+    - Title: `"Churning status"`.
+    - Figure Size: `(5,5)`, meaning a smaller 5x5 inch chart.
+    - Legend Position: `"lower right"`.
+- Final visualisation:
+    - This code creates a stacked bar chart showing the proportion of retained vs churned companies.
+    - The legend in the lower right distinguishes the two groups.
+- <output>
+- About 10% of the total customers have churned. (This sounds about right)
 
-About 10% of the total customers have churned. (This sounds about right)
+### XIII. Sales Channel
+This analysis helps businesses identify which sales channels have the highest customer churn, allowing them to target retention efforts effectively.
+- Extracts relevant columns (`id`, `channel_sales`, `churn`).
+- Groups data by `channel_sales` and `churn`, counting the number of companies per category.
+- Reshapes data using `unstack()`, turning churn categories into columns.
+- Computes churn percentages for each sales channel.
+- Sorts the results to show the highest churn channels first.
+- Outputs a table showing churn rates per sales channel.
 
-### Sales channel
+#### Selecting Relevant Columns
 ```
 channel = client_df[['id', 'channel_sales', 'churn']]
+```
+- Extracts only the `id`, `channel_sales`, and `churn` columns from `client_df` into a new DataFrame `channel`.
+- Assumption:
+    - `id`: Unique identifier for each client/company.
+    - `channel_sales`: The sales channel through which the client was acquired (e.g., online, partner, direct sales).
+    - `churn`: Whether the client has churned (`0` = retained, `1` = churned).
+
+#### Grouping and Reshaping the Data
+```
 channel = channel.groupby([channel['channel_sales'], channel['churn']])['id'].count().unstack(level=1).fillna(0)
+```
+- Groups data by `channel_sales` (sales channel) and `churn` (retained or churned).
+- Counts the number of unique `id`s (companies) for each combination of sales channel and churn status.
+- This shows the number of retained and churned clients per sales channel.
+- `unstack(level=1)`:
+    - Moves the `churn` index from rows to columns.
+    - Converts the grouped data into a table format where:
+        - Rows = Sales channels (`channel_sales`).
+        - Columns = Churn values (`0` for retained, `1` for churned).
+- `fillna(0)`:
+    - If any `channel_sales` category has no churned or retained clients, it fills missing values with `0`.
+
+
+#### Calculating Churn Percentage and Sorting
+```
 channel_churn = (channel.div(channel.sum(axis=1), axis=0) * 100).sort_values(by=[1], ascending=False)
 ```
+- `channel.sum(axis=1)`:
+    - Sums the total clients (both churned and retained) per sales channel.
+- `channel.div(channel.sum(axis=1), axis=0)`:
+    - Divides each value in a row by the total number of clients in that row.
+    - This converts raw counts into percentages.
+- `* 100`:
+    - Converts the proportion into a percentage.
+- Sorts the table based on churn percentage (`1` column) in descending order.
+- Channels with the highest churn appear first.
 
+#### Displaying the Final Data
 ```
 channel_churn
 ```
-
-Interestingly, the churning customers are distributed over 5 different values for `channel_sales`. As well as this, the value of `MISSING` has a churn rate of 7.6%. `MISSING` indicates a missing value and was added by the team when they were cleaning the dataset. This feature could be an important feature when it comes to building our model.
+- Displays the final table, where:
+    - Each row represents a sales channel.
+    - Each column represents the percentage of retained (`0`) and churned (`1`) clients.
+    - Sorted in descending order of churn rate.
+- <output>
+- Interestingly, the churning customers are distributed over 5 different values for `channel_sales`. As well as this, the value of `MISSING` has a churn rate of 7.6%. `MISSING` indicates a missing value and was added by the team when they were cleaning the dataset. This feature could be an important feature when it comes to building our model.
 
 ### Consumption
 
