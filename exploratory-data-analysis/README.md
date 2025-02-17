@@ -394,70 +394,148 @@ channel_churn
 - <output>
 - Interestingly, the churning customers are distributed over 5 different values for `channel_sales`. As well as this, the value of `MISSING` has a churn rate of 7.6%. `MISSING` indicates a missing value and was added by the team when they were cleaning the dataset. This feature could be an important feature when it comes to building our model.
 
-### Consumption
-
+### XIV. Consumption
 Let's see the distribution of the consumption in the last year and month. Since the consumption data is univariate, let's use histograms to visualize their distribution.
+- Data Selection (`consumption`)
+    - Extracts relevant features related to energy consumption and churn.
+- Histogram Function (`plot_distribution`)
+    - Creates stacked histograms to compare retained vs churned clients.
+    - Uses 50 bins for smoother visualization.
+- Histogram Subplots
+    - Plots histograms for different consumption variables.
+- Boxplot Subplots
+    - Uses boxplots to visualize distributions and outliers.
+- Formatting
+    - Removes scientific notation and adjusts x-axis limits.
+
+#### i. Extracting Relevant Data
 ```
 consumption = client_df[['id', 'cons_12m', 'cons_gas_12m', 'cons_last_month', 'imp_cons', 'has_gas', 'churn']]
 ```
+- This creates a new DataFrame `consumption` from `client_df`, selecting only specific columns related to energy consumption and churn:
+    - `id`: Unique identifier for each company.
+    - `cons_12m`: Total electricity consumption over the last 12 months.
+    - `cons_gas_12m`: Total gas consumption over the last 12 months.
+    - `cons_last_month`: Electricity consumption in the last month.
+    - `imp_cons`: Estimated or imputed consumption (could be predicted or missing-value filled data).
+    - `has_gas`: Indicates if the company has a gas connection (`'t'` for true, `'f'` for false).
+    - `churn`: Whether the company churned or not (`0` = retained, `1` = churned).
 
+#### ii. Defining the `plot_distribution` Function
 ```
 def plot_distribution(dataframe, column, ax, bins_=50):
-    """
-    Plot variable distribution in a stacked histogram of churned or retained company
-    """
-    # Create a temporal dataframe with the data to be plot
-    temp = pd.DataFrame({"Retention": dataframe[dataframe["churn"]==0][column],
-    "Churn":dataframe[dataframe["churn"]==1][column]})
-    # Plot the histogram
-    temp[["Retention","Churn"]].plot(kind='hist', bins=bins_, ax=ax, stacked=True)
-    # X-axis label
-    ax.set_xlabel(column)
-    # Change the x-axis to plain style
-    ax.ticklabel_format(style='plain', axis='x')
 ```
+- This function plots a histogram of a specified column to compare retained (`churn=0`) vs. churned (`churn=1`) customers.
 
+##### Creating a Temporary DataFrame
+```
+temp = pd.DataFrame({
+    "Retention": dataframe[dataframe["churn"]==0][column],
+    "Churn": dataframe[dataframe["churn"]==1][column]
+})
+```
+- Creates a temporary DataFrame `temp`:
+    - `Retention`: Extracts values of the given column for retained clients (`churn=0`).
+    - `Churn`: Extracts values of the given column for churned clients (`churn=1`).
+
+##### Plotting a Stacked Histogram
+```
+temp[["Retention","Churn"]].plot(kind='hist', bins=bins_, ax=ax, stacked=True)
+```
+- Plots a histogram where:
+    - `kind='hist'`: Creates a histogram.
+    - `bins=bins_`: Number of bins in the histogram (default = 50).
+    - `ax=ax`: Uses the given subplot axis.
+    - `stacked=True`: Stacks the two distributions on top of each other.
+
+##### Formatting the Plot
+```
+ax.set_xlabel(column)
+ax.ticklabel_format(style='plain', axis='x')
+```
+- Sets the x-axis label to the column name.
+- Changes the x-axis format to remove scientific notation (`style='plain'`).
+
+#### iii. Creating Subplots for Histograms
 ```
 fig, axs = plt.subplots(nrows=4, figsize=(18, 25))
+```
+- Creates 4 subplots (one for each variable) in a figure of size 18x25 inches.
+- `axs` is a list of Axes objects, where each element is used for one histogram.
 
+##### Plotting Histograms
+```
 plot_distribution(consumption, 'cons_12m', axs[0])
 plot_distribution(consumption[consumption['has_gas'] == 't'], 'cons_gas_12m', axs[1])
 plot_distribution(consumption, 'cons_last_month', axs[2])
 plot_distribution(consumption, 'imp_cons', axs[3])
 ```
+- Calls `plot_distribution()` to plot histograms for different energy consumption variables:
+    - `cons_12m`: Total electricity consumption over 12 months.
+    - `cons_gas_12m` (only for clients with gas = `'t'`).
+    - `cons_last_month`: Electricity consumption in the last month.
+    - `imp_cons`: Estimated/imputed consumption.
+- <output>
+- Clearly, the consumption data is highly positively skewed, presenting a very long right-tail towards the higher values of the distribution.
+- The values on the higher and lower end of the distribution are likely to be outliers.
+- We can use a standard plot to visualise the outliers in more detail.
+- A boxplot is a standardized way of displaying the distribution based on a five number summary:
+    - Minimum
+    - First quartile (Q1)
+    - Median
+    - Third quartile (Q3)
+    - Maximum
+- It can reveal outliers and what their values are. It can also tell us if our data is symmetrical, how tightly our data is grouped and if/how our data is skewed.
 
-Clearly, the consumption data is highly positively skewed, presenting a very long right-tail towards the higher values of the distribution. The values on the higher and lower end of the distribution are likely to be outliers. We can use a standard plot to visualise the outliers in more detail. A boxplot is a standardized way of displaying the distribution based on a five number summary:
-- Minimum
-- First quartile (Q1)
-- Median
-- Third quartile (Q3)
-- Maximum
-
-It can reveal outliers and what their values are. It can also tell us if our data is symmetrical, how tightly our data is grouped and if/how our data is skewed.
-
+#### iv. Creating Boxplots
 ```
 fig, axs = plt.subplots(nrows=4, figsize=(18,25))
+```
+- Creates another figure with 4 subplots for boxplots.
 
-# Plot histogram
+##### Plotting Boxplots
+```
 sns.boxplot(consumption["cons_12m"], ax=axs[0])
 sns.boxplot(consumption[consumption["has_gas"] == "t"]["cons_gas_12m"], ax=axs[1])
 sns.boxplot(consumption["cons_last_month"], ax=axs[2])
 sns.boxplot(consumption["imp_cons"], ax=axs[3])
+```
+- Uses Seaborn's `boxplot` function to visualize the distribution of each variable.
+- Boxplots help in identifying:
+    - Median (middle line inside the box).
+    - Interquartile range (IQR) (box size).
+    - Outliers (dots outside the whiskers).
 
-# Remove scientific notation
+#### v. Formatting the Boxplots
+```
 for ax in axs:
     ax.ticklabel_format(style='plain', axis='x')
-    # Set x-axis limit
-    axs[0].set_xlim(-200000, 2000000)
-    axs[1].set_xlim(-200000, 2000000)
-    axs[2].set_xlim(-20000, 100000)
-    plt.show()
 ```
+- Removes scientific notation from x-axis labels.
+```
+axs[0].set_xlim(-200000, 2000000)
+axs[1].set_xlim(-200000, 2000000)
+axs[2].set_xlim(-20000, 100000)
+plt.show()
+```
+- Sets x-axis limits for better visualization.
+- Displays the plots using `plt.show()`.
+- <output>
+- We will deal with skewness and outliers during feature engineering in the next exercise.
 
-We will deal with skewness and outliers during feature engineering in the next exercise.
+#### vi. Final Output
+- Histograms: Show the distribution of energy consumption among retained and churned clients.
+- Boxplots: Show median, spread, and outliers in consumption data.
+- These visualizations help businesses identify differences in consumption patterns between retained and churned clients, aiding in customer behavior analysis and churn prediction.
 
-### Forecast
+### XV. Forecast
+This analysis can help businesses adjust pricing strategies, offer better discounts, or predict which customers are at risk of churning based on their forecasted energy usage.
+- Extracts forecast-related data into the `forecast` DataFrame.
+- Creates subplots to display multiple histograms.
+- Plots histograms to compare retained vs. churned customers based on forecasted energy consumption and pricing.
+- Helps analyze how pricing, discounts, and forecasted consumption impact churn behavior.
 
+#### Extracting Forecast-Related Data
 ```
 forecast = client_df[
     ["id", "forecast_cons_12m",
@@ -467,11 +545,29 @@ forecast = client_df[
     ]
 ]
 ```
+- Creates a new DataFrame `forecast` by selecting columns related to forecasted energy consumption and pricing from `client_df`.
+- Selected Columns:
+    - `id` → Unique identifier for each client.
+    - `forecast_cons_12m` → Forecasted electricity consumption for the next 12 months.
+    - `forecast_cons_year` → Forecasted yearly consumption.
+    - `forecast_discount_energy` → Forecasted energy discount (potential promotions).
+    - `forecast_meter_rent_12m` → Forecasted meter rental cost for 12 months.
+    - `forecast_price_energy_off_peak` → Forecasted price for off-peak energy usage.
+    - `forecast_price_energy_peak` → Forecasted price for peak-time energy usage.
+    - `forecast_price_pow_off_peak` → Forecasted price for off-peak power.
+    - `churn` → Whether the client churned (`1`) or retained (`0`).
+- This dataset helps analyze how forecasted energy usage and pricing affect customer retention and churn.
 
+#### Creating Subplots for Histograms
 ```
 fig, axs = plt.subplots(nrows=7, figsize=(18,50))
+```
+- Creates 7 subplots (one for each forecast-related variable except `id` and `churn`).
+- `figsize=(18, 50)` ensures that the plots are large and easy to read.
+- `axs` is a list of Axes objects, where each element corresponds to a separate subplot.
 
-# Plot histogram
+#### Plotting Histograms
+```
 plot_distribution(client_df, "forecast_cons_12m", axs[0])
 plot_distribution(client_df, "forecast_cons_year", axs[1])
 plot_distribution(client_df, "forecast_discount_energy", axs[2])
@@ -480,75 +576,247 @@ plot_distribution(client_df, "forecast_price_energy_off_peak", axs[4])
 plot_distribution(client_df, "forecast_price_energy_peak", axs[5])
 plot_distribution(client_df, "forecast_price_pow_off_peak", axs[6])
 ```
+- Calls the `plot_distribution function` (defined earlier) to plot histograms for each forecast-related variable.
+- These histograms show the distribution of each forecast variable for retained (`churn=0`) and churned (`churn=1`) clients.
+- <output>
+- Similarly to the consumption plots, we can observe that a lot of the variables are highly positively skewed, creating a very long tail for the higher values.
+- We will make some transformations during the next exercise to correct for this skewness.
 
-Similarly to the consumption plots, we can observe that a lot of the variables are highly positively skewed, creating a very long tail for the higher values. We will make some transformations during the next exercise to correct for this skewness.
+#### What Each Histogram Represents
+- Each stacked histogram visualizes how churned vs retained customers differ in forecasted data:
 
-### Contract type
+| Forecast Variable | Meaning | Insight from Histogram |
+|-----------|-----------|----------------------|
+| `forecast_cons_12m` | Forecasted electricity consumption in 12 months | Do churned customers have higher/lower forecasted consumption? |
+| `forecast_cons_year` | Forecasted total yearly consumption | Does consumption prediction influence churn? |
+| `forecast_discount_energy` | Forecasted discount on energy cost | Are churned customers receiving fewer discounts? |
+| `forecast_meter_rent_12m` | Forecasted meter rent for 12 months | Do higher forecasted meter rents lead to more churn? |
+| `forecast_price_energy_off_peak` | Forecasted price for off-peak energy usage | Are churned customers paying more for off-peak energy? |
+| `forecast_price_energy_peak` | Forecasted price for peak energy usage | Are peak energy prices higher for churned customers? |
+| `forecast_price_pow_off_peak` | Forecasted power price for off-peak usage | Do lower off-peak power prices reduce churn? |
 
+- By analyzing these plots, patterns in customer churn behavior can be identified.
+
+### XVI. Contract type
+This analysis helps businesses understand the relationship between contract types and customer churn.
+- Extracts contract and churn data from `client_df`.
+- Groups and counts clients based on `has_gas` and `churn`.
+- Converts counts to percentages to show churn distribution.
+- Sorts by churn rate to identify which contract type has higher churn.
+- Plots the results using `plot_stacked_bars`.
+
+#### Extracting Relevant Data
 ```
 contract_type = client_df[['id', 'has_gas', 'churn']]
+```
+- Creates a new DataFrame `contract_type` containing:
+    - `id`: Unique client identifier.
+    - `has_gas`: Whether the client has a gas contract (`'t'` for true, `'f'` for false).
+    - `churn`: Whether the client churned (`1`) or retained (`0`).
+- This dataset helps analyze how having a gas contract affects customer churn behavior.
+
+#### Grouping and Counting Customers
+```
 contract = contract_type.groupby([contract_type['churn'], contract_type['has_gas']])['id'].count().unstack(level=0)
+```
+- Grouping by `churn` and `has_gas`:
+    - This groups data based on whether the client has a gas contract (`has_gas`) and whether they churned (`churn`).
+- Counting occurrences:
+    - `['id'].count()` counts the number of clients in each group.
+- Using `.unstack(level=0)`:
+    - Converts the `churn` values (`0` = retained, `1` = churned) into separate columns.
+    - This results in a DataFrame where:
+        - Rows = Clients with (`'t'`) or without (`'f'`) gas contracts.
+        - Columns = Retention (0) and Churn (1) counts.
+
+#### Converting to Percentage
+```
 contract_percentage = (contract.div(contract.sum(axis=1), axis=0) * 100).sort_values(by=[1], ascending=False)
 ```
+- Convert to percentage:
+    - `contract.sum(axis=1)`: Computes the total number of clients for each `has_gas` category.
+    - `div(..., axis=0)`: Divides each value by the total number of clients for that contract type.
+    - `* 100`: Converts values to percentages.
+- Sorting by churn percentage (`1`) in descending order:
+    - This ensures that clients with the highest churn rate appear first.
 
+#### Plotting the Data
 ```
 plot_stacked_bars(contract_percentage, 'Contract type (with gas')
 ```
+- Calls the `plot_stacked_bars` function to visualize the data.
+- Generates a stacked bar chart, where:
+    - The x-axis represents contract type (`'t'` or `'f'`).
+    - The y-axis shows percentage distribution of churned and retained customers.
+    - Colors differentiate churned vs retained clients.
+- <output>
+- The churn percentage for 't' (gas users) is lower than for 'f' (non-gas users) and the gas contracts may improve retention.
+- 'f' (no gas) has a higher churn rate and the company should:
+    - Offer gas contracts to reduce churn.
+    - Investigate why non-gas clients are leaving.
 
-### Margins
+### XVII. Margins
+This analysis helps in understanding profitability and optimizing pricing strategies.
+- Extracts margin-related data from `client_df`.
+- Creates three subplots for gross margin, net margin on power, and overall net margin.
+- Plots boxplots to visualize margin distribution and detect outliers.
+- Formats x-axis labels to avoid scientific notation.
+- Displays the figure with all boxplots.
+
+#### Extracting Margin-Related Data
 ```
 margin = client_df[['id', 'margin_gross_pow_ele', 'margin_net_pow_ele', 'net_margin']]
 ```
+- Creates a new DataFrame `margin` with the following columns:
+    - `id` → Unique identifier for each client.
+    - `margin_gross_pow_ele` → Gross margin for electricity power.
+    - `margin_net_pow_ele` → Net margin for electricity power.
+    - `net_margin` → Overall net margin for the client.
+- This data helps analyze profitability per client and identify patterns in margins.
 
+#### Creating Subplots
 ```
 fig, axs = plt.subplots(nrows=3, figsize=(18,20))
-# Plot histogram
+```
+- Creates a figure (`fig`) and a set of subplots (`axs`).
+- `nrows=3` → Three subplots (one for each margin-related variable).
+- `figsize=(18,20)` → Ensures the plots are large and easy to read.
+- `axs` is a list of three Axes objects, where:
+    - `axs[0]` → First plot for `margin_gross_pow_ele`.
+    - `axs[1]` → Second plot for `margin_net_pow_ele`.
+    - `axs[2]` → Third plot for `net_margin`.
+
+#### Plotting Boxplots
+```
 sns.boxplot(margin["margin_gross_pow_ele"], ax=axs[0])
 sns.boxplot(margin["margin_net_pow_ele"],ax=axs[1])
 sns.boxplot(margin["net_margin"], ax=axs[2])
-# Remove scientific notation
+```
+- Uses Seaborn's `boxplot()` function to plot boxplots for each margin-related variable.
+- Why Boxplots?
+    - Shows the distribution of values (minimum, quartiles, median, outliers).
+    - Helps detect anomalies (e.g., extreme outliers in margins).
+- How Each Plot Works:
+    - `axs[0]` → Boxplot for `margin_gross_pow_ele`.
+    - `axs[1]` → Boxplot for `margin_net_pow_ele`.
+    - `axs[2]` → Boxplot for `net_margin`.
+
+#### Formatting the X-Axis
+```
 axs[0].ticklabel_format(style='plain', axis='x')
 axs[1].ticklabel_format(style='plain', axis='x')
 axs[2].ticklabel_format(style='plain', axis='x')
+```
+- Ensures x-axis values are displayed in plain format (not scientific notation).
+- Why? Some margin values may be large, and scientific notation can be hard to read.
+
+#### Displaying the Plots
+```
 plt.show()
 ```
+- Displays the figure with all three boxplots.
+- <output>
+- We can see some outliers here as well which we will deal with in the next exercise.
 
-We can see some outliers here as well which we will deal with in the next exercise.
+### XVIII. Subscribed power
+This analysis helps identify whether power consumption influences customer churn and guides retention strategies.
+- Extracts power-related data (`id`, `pow_max`, `churn`).
+- Creates a subplot for visualization.
+- Plots a histogram to compare `pow_max` distribution for churned vs. retained clients.
+- Analyzes power consumption trends to predict churn behavior.
 
-### Subscribed power
+#### Extracting Power-Related Data
 ```
 power = client_df[['id', 'pow_max', 'churn']]
 ```
+- Creates a new DataFrame `power` with the following columns:
+    - `id` → Unique identifier for each client.
+    - `pow_max` → Maximum power consumption recorded for the client.
+    - `churn` → Indicates whether the client churned (`1`) or retained (`0`).
 
+#### Creating a Subplot
 ```
 fig, axs = plt.subplots(nrows=1, figsize=(18, 10))
+```
+- Creates a figure (`fig`) and one subplot (`axs`).
+- `nrows=1` → Only one plot will be created.
+- `figsize=(18, 10)` → Makes the plot large for better readability.
+- `axs` is a single Axes object, used to plot the histogram.
+
+#### Plotting the Distribution
+```
 plot_distribution(power, 'pow_max', axs)
 ```
+- Calls the `plot_distribution` function, which was defined earlier, to:
+    - Plot a stacked histogram of `pow_max`, separated by retained (`0`) vs. churned (`1`) clients.
+    - Show how power consumption differs between churned and retained clients.
+- <output>
 
-### Other columns
+### XIX. Other columns
+This analysis helps identify key drivers of customer churn and informs retention strategies.
+- Extracts relevant client data (`nb_prod_act`, `num_years_antig`, `origin_up`, `churn`).
+- Groups and counts clients based on churn status for each factor.
+- Converts counts into percentages for better interpretation.
+- Visualizes the results using stacked bar charts.
+- Provides actionable insights to reduce churn and improve retention strategies.
 
+#### Extracting Relevant Data
 ```
 others = client_df[['id', 'nb_prod_act', 'num_years_antig', 'origin_up', 'churn']]
+```
+- Creates a new DataFrame `others` with:
+    - `id` → Unique identifier for each client.
+    - `nb_prod_act` → Number of active products the client has.
+    - `num_years_antig` → Number of years the client has been with the company (tenure).
+    - `origin_up` → The origin of the client's contract or offer.
+    - `churn` → Whether the client churned (`1`) or was retained (`0`).
+
+#### Analyzing the Impact of Number of Products on Churn
+```
 products = others.groupby([others["nb_prod_act"],others["churn"]])["id"].count().unstack(level=1)
+```
+- Groups data by:
+    - `nb_prod_act` (number of active products).
+    - `churn` (retained `0` vs. churned `1`).
+- Counts the number of clients in each group (`id.count()`).
+- Unstacks `churn` so that:
+    - One column represents retained clients (`0`).
+    - Another column represents churned clients (`1`).
+
+#### Converting to Percentage
+```
 products_percentage = (products.div(products.sum(axis=1), axis=0)*100).sort_values(by=[1], ascending=False)
 ```
-
+- Calculates the churn percentage for each `nb_prod_act` group:
+    - `products.sum(axis=1)` → Gets the total clients per product category.
+    - `div(..., axis=0) * 100` → Converts values to percentages.
+- Sorts by churn percentage (`1`) in descending order.
+- Visualizing:
 ```
 plot_stacked_bars(products_percentage, "Number of products")
 ```
+- Calls `plot_stacked_bars` to generate a stacked bar chart, showing:
+    - Churn percentage vs. Number of products.
 
+#### Analyzing the Impact of Client Tenure on Churn
 ```
 years_antig = others.groupby([others["num_years_antig"],others["churn"]])["id"].count().unstack(level=1)
 years_antig_percentage = (years_antig.div(years_antig.sum(axis=1), axis=0)*100)
 plot_stacked_bars(years_antig_percentage, "Number years")
 ```
+- Groups clients by `num_years_antig` (years of tenure) and churn status.
+- Calculates churn percentages for each tenure group.
+- Visualizes churn trends across different tenure lengths.
 
+#### Analyzing the Impact of Contract/Offer Origin on Churn
 ```
 origin = others.groupby([others["origin_up"],others["churn"]])["id"].count().unstack(level=1)
 origin_percentage = (origin.div(origin.sum(axis=1), axis=0)*100)
 plot_stacked_bars(origin_percentage, "Origin contract/offer")
 ```
-
+- Groups clients by `origin_up` (contract/offer origin) and churn status.
+- Calculates churn percentages for different contract origins.
+- Visualizes churn rates for different acquisition sources.
 
 
 ---
