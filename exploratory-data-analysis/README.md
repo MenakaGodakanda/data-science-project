@@ -95,7 +95,8 @@ price_df.head(3)
 - <output>
 - With the price data, it is purely numeric data but we can see a lot of zeros.
 
-### III. Getting DataFrame Information
+## 3. Descriptive statistics of data
+### I. Getting DataFrame Information
 #### Client Data:
 ```
 client_df.info()
@@ -136,7 +137,7 @@ price_df.info()
     - Memory usage: 11.8+ MB
 - You can see that all of the `datetime` related columns are not currently in `datetime` format. We will need to convert these later.
 
-### IV. Statistical Summary
+### II. Statistical Summary
 Now let's look at some statistics about the datasets:
 
 #### Client Data
@@ -160,7 +161,7 @@ price_df.describe()
 - <output>
 - Overall the price data looks good.
 
-## 3. Data visualization
+## 4. Data visualization
 Now let's dive a bit deeper into the dataframes:
 
 ### I. `plot_stacked_bars` Function
