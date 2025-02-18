@@ -85,14 +85,20 @@ client_df.head(3)
     - Displays the first n rows of the DataFrame.
     - If `n` is not provided, it defaults to 5.
     - Here, `head(3)` shows the first 3 rows of `client_df`.
-- <Output>
+
+##### Output:
+![Screenshot 2025-02-18 at 1 25 50 pm](https://github.com/user-attachments/assets/2a01afa7-fc63-4239-91eb-ed0a64e3e213)
+![Screenshot 2025-02-18 at 1 26 16 pm](https://github.com/user-attachments/assets/229703da-0c12-470f-9d3e-48ff8fe348b2)
 - With the client data, we have a mix of numeric and categorical data, which we will need to transform before modelling later.
 
 #### Price Data:
 ```
 price_df.head(3)
 ```
-- <output>
+
+##### Output:
+![Screenshot 2025-02-18 at 1 29 49 pm](https://github.com/user-attachments/assets/7ed86976-42f4-4a6a-a23d-5241b8871a05)
+
 - With the price data, it is purely numeric data but we can see a lot of zeros.
 
 ## 3. Descriptive statistics of data
@@ -106,7 +112,10 @@ client_df.info()
     - The number of columns.
     - The column names and their data types (e.g., integer, float, object).
     - The memory usage.
-- <output>
+
+##### Output:
+![Screenshot 2025-02-18 at 1 31 39 pm](https://github.com/user-attachments/assets/f1c0387c-4fe1-4b2c-a03d-a2bd9dfcf6be)
+
 - Output describes:
     - 26 columns and 14606 entries.
     - Example columns:
@@ -124,7 +133,10 @@ client_df.info()
 ```
 price_df.info()
 ```
-- <output>
+
+##### Output:
+![Screenshot 2025-02-18 at 1 32 29 pm](https://github.com/user-attachments/assets/e9b4b2aa-3213-431c-9a9c-63bdb2aeb0c2)
+
 - Output describes:
     - 8 columns and 193002 entries.
     - Example columns:
@@ -151,14 +163,21 @@ client_df.describe()
     - Standard deviation (`std`)
     - Min and Max
     - Percentiles (25%, 50% (median), 75%)
-- <output>
+
+##### Output:
+![Screenshot 2025-02-18 at 1 34 21 pm](https://github.com/user-attachments/assets/b070defa-698f-43d3-854d-316b4dce0f08)
+![Screenshot 2025-02-18 at 1 34 52 pm](https://github.com/user-attachments/assets/2ad83fd6-4f61-431f-9c9a-716779278437)
+
 - The describe method gives us a lot of information about the client data. The key point to take away from this is that we have highly skewed data, as exhibited by the percentile values.
 
 #### Price Data
 ```
 price_df.describe()
 ```
-- <output>
+
+##### Output:
+![Screenshot 2025-02-18 at 1 36 03 pm](https://github.com/user-attachments/assets/bd48a2d4-8bac-474d-9e2d-98fb8c77cbc6)
+
 - Overall the price data looks good.
 
 ## 4. Data visualization
@@ -332,7 +351,10 @@ plot_stacked_bars(churn_percentage.transpose(), "Churning status", (5, 5), legen
 - Final visualisation:
     - This code creates a stacked bar chart showing the proportion of retained vs churned companies.
     - The legend in the lower right distinguishes the two groups.
-- <output>
+
+##### Output:
+![Screenshot 2025-02-18 at 1 40 29 pm](https://github.com/user-attachments/assets/aa3d7bb1-39db-4501-8af9-278543a217d2)
+
 - About 10% of the total customers have churned. (This sounds about right)
 
 ### XIII. Sales Channel
@@ -392,7 +414,10 @@ channel_churn
     - Each row represents a sales channel.
     - Each column represents the percentage of retained (`0`) and churned (`1`) clients.
     - Sorted in descending order of churn rate.
-- <output>
+
+##### Output:
+![Screenshot 2025-02-18 at 1 41 55 pm](https://github.com/user-attachments/assets/529adf33-3199-46ce-a788-07b4e30e3040)
+
 - Interestingly, the churning customers are distributed over 5 different values for `channel_sales`. As well as this, the value of `MISSING` has a churn rate of 7.6%. `MISSING` indicates a missing value and was added by the team when they were cleaning the dataset. This feature could be an important feature when it comes to building our model.
 
 ### XIV. Consumption
@@ -476,7 +501,11 @@ plot_distribution(consumption, 'imp_cons', axs[3])
     - `cons_gas_12m` (only for clients with gas = `'t'`).
     - `cons_last_month`: Electricity consumption in the last month.
     - `imp_cons`: Estimated/imputed consumption.
-- <output>
+
+##### Output:
+![Screenshot 2025-02-18 at 1 43 16 pm](https://github.com/user-attachments/assets/0a330dd9-9827-4381-9952-17e25190d3e5)
+![Screenshot 2025-02-18 at 1 43 39 pm](https://github.com/user-attachments/assets/06523c01-97ea-468f-9a7b-5a542f8e3f42)
+
 - Clearly, the consumption data is highly positively skewed, presenting a very long right-tail towards the higher values of the distribution.
 - The values on the higher and lower end of the distribution are likely to be outliers.
 - We can use a standard plot to visualise the outliers in more detail.
@@ -521,7 +550,11 @@ plt.show()
 ```
 - Sets x-axis limits for better visualization.
 - Displays the plots using `plt.show()`.
-- <output>
+
+##### Output:
+![Screenshot 2025-02-18 at 1 45 08 pm](https://github.com/user-attachments/assets/fc1cd987-18d8-447c-aa38-1837022c1035)
+![Screenshot 2025-02-18 at 1 45 30 pm](https://github.com/user-attachments/assets/fef8b951-8411-4461-bb03-6c7d404870ee)
+
 - We will deal with skewness and outliers during feature engineering in the next exercise.
 
 #### vi. Final Output
@@ -579,7 +612,13 @@ plot_distribution(client_df, "forecast_price_pow_off_peak", axs[6])
 ```
 - Calls the `plot_distribution function` (defined earlier) to plot histograms for each forecast-related variable.
 - These histograms show the distribution of each forecast variable for retained (`churn=0`) and churned (`churn=1`) clients.
-- <output>
+
+##### Output:
+![Screenshot 2025-02-18 at 1 47 48 pm](https://github.com/user-attachments/assets/6f848726-55f5-4fab-acfa-ab3ccab504e8)
+![Screenshot 2025-02-18 at 1 48 05 pm](https://github.com/user-attachments/assets/ea1069f7-7a81-4a96-af1f-7b2eb5a6bd83)
+![Screenshot 2025-02-18 at 1 48 23 pm](https://github.com/user-attachments/assets/1f616312-aa8c-4257-a351-cea395612aef)
+![Screenshot 2025-02-18 at 1 48 39 pm](https://github.com/user-attachments/assets/fc780cd7-7467-45e6-8fcf-e98d57fef6be)
+
 - Similarly to the consumption plots, we can observe that a lot of the variables are highly positively skewed, creating a very long tail for the higher values.
 - We will make some transformations during the next exercise to correct for this skewness.
 
@@ -650,7 +689,10 @@ plot_stacked_bars(contract_percentage, 'Contract type (with gas')
     - The x-axis represents contract type (`'t'` or `'f'`).
     - The y-axis shows percentage distribution of churned and retained customers.
     - Colors differentiate churned vs retained clients.
-- <output>
+
+##### Output:
+![Screenshot 2025-02-18 at 1 49 58 pm](https://github.com/user-attachments/assets/1432c97a-b501-459b-9913-e536cad5ab15)
+
 - The churn percentage for 't' (gas users) is lower than for 'f' (non-gas users) and the gas contracts may improve retention.
 - 'f' (no gas) has a higher churn rate and the company should:
     - Offer gas contracts to reduce churn.
@@ -716,7 +758,11 @@ axs[2].ticklabel_format(style='plain', axis='x')
 plt.show()
 ```
 - Displays the figure with all three boxplots.
-- <output>
+
+##### Output:
+![Screenshot 2025-02-18 at 1 50 34 pm](https://github.com/user-attachments/assets/72956785-618a-4350-88ad-13cb280679a3)
+![Screenshot 2025-02-18 at 1 50 49 pm](https://github.com/user-attachments/assets/84135f77-9fad-4894-a313-602e71c2cfe8)
+
 - We can see some outliers here as well which we will deal with in the next exercise.
 
 ### XVIII. Subscribed power
@@ -751,7 +797,9 @@ plot_distribution(power, 'pow_max', axs)
 - Calls the `plot_distribution` function, which was defined earlier, to:
     - Plot a stacked histogram of `pow_max`, separated by retained (`0`) vs. churned (`1`) clients.
     - Show how power consumption differs between churned and retained clients.
-- <output>
+
+##### Output:
+![Screenshot 2025-02-18 at 1 51 57 pm](https://github.com/user-attachments/assets/f43718b5-d38c-4b61-af21-a7ba05f14489)
 
 ### XIX. Other columns
 This analysis helps identify key drivers of customer churn and informs retention strategies.
@@ -799,6 +847,9 @@ plot_stacked_bars(products_percentage, "Number of products")
 - Calls `plot_stacked_bars` to generate a stacked bar chart, showing:
     - Churn percentage vs. Number of products.
 
+##### Output:
+![Screenshot 2025-02-18 at 1 53 41 pm](https://github.com/user-attachments/assets/7a5abc4a-cf78-4dc0-9efe-169c893a1781)
+
 #### Analyzing the Impact of Client Tenure on Churn
 ```
 years_antig = others.groupby([others["num_years_antig"],others["churn"]])["id"].count().unstack(level=1)
@@ -808,6 +859,9 @@ plot_stacked_bars(years_antig_percentage, "Number years")
 - Groups clients by `num_years_antig` (years of tenure) and churn status.
 - Calculates churn percentages for each tenure group.
 - Visualizes churn trends across different tenure lengths.
+
+##### Output:
+![Screenshot 2025-02-18 at 1 54 38 pm](https://github.com/user-attachments/assets/0683c534-9e09-4254-baf5-1cca0f72a189)
 
 #### Analyzing the Impact of Contract/Offer Origin on Churn
 ```
@@ -819,6 +873,8 @@ plot_stacked_bars(origin_percentage, "Origin contract/offer")
 - Calculates churn percentages for different contract origins.
 - Visualizes churn rates for different acquisition sources.
 
+##### Output:
+![Screenshot 2025-02-18 at 1 56 06 pm](https://github.com/user-attachments/assets/ba578353-7196-4385-8b4f-dbc505cce2d1)
 
 ---
 
